@@ -7,6 +7,9 @@ scratch.
 It doesn't do anything cool except write machine code into a memory region and
 then execute it. That's really all you need for a simple example.
 
+I also made a version in Python, using only the standard Python library (i.e.,
+ctypes).
+
 Requirements
 ------------
 
@@ -46,6 +49,26 @@ So, to JIT-compile a block of code that multiplies with the number 11, do:
     0
 
 The default value is 2.
+
+You can also run the Python version like so:
+
+    $ python mj.py 10
+    Pagesize: 4096
+    Allocating one page of memory
+    JIT-compiling a native mul-function w/arg 10
+    Making function block executable
+    Testing function
+    mul(0) = 0
+    mul(1) = 10
+    mul(2) = 20
+    mul(3) = 30
+    mul(4) = 40
+    mul(5) = 50
+    mul(6) = 60
+    mul(7) = 70
+    mul(8) = 80
+    mul(9) = 90
+    Deallocating function
 
 How to disassemble
 ------------------
