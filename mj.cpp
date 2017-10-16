@@ -23,33 +23,32 @@ void ret2_program(uint8_t* block, const size_t /*length*/)
   block[2] = 0xc3; // RETN
 }
 
-void mul2_program(uint8_t* block, const size_t length)
+void mul2_program(uint8_t* block, const size_t)
 {
   /*
-   * 40085a:	55                   	push   %rbp
-   * 40085b:	48 89 e5             	mov    %rsp,%rbp
-   * 40085e:	89 7d fc             	mov    %edi,-0x4(%rbp)
-   * 400861:	8b 45 fc             	mov    -0x4(%rbp),%eax
-   * 400864:	01 c0                	add    %eax,%eax
-   * 400866:	5d                   	pop    %rbp
-   * 400867:	c3                   	retq
+   * 4007ed:	55                   	push   rbp
+   * 4007ee:	48 89 e5             	mov    rbp,rsp
+   * 4007f1:	89 7d fc             	mov    DWORD PTR [rbp-0x4],edi
+   * 4007f4:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+   * 4007f7:	01 c0                	add    eax,eax
+   * 4007f9:	5d                   	pop    rbp
+   * 4007fa:	c3                   	ret
    */
 
-  assert(length >= 14);
-
-  // prologue; don't usually need this
-  block[0] = 0x55; // push rbp
-  // mov %rsp, %rbp
+  // function prologue
+  // push rbp
+  block[0] = 0x55;
+  // mov rbp, rsp
   block[1] = 0x48;
   block[2] = 0x89;
   block[3] = 0xe5;
 
-  // mov %edi, -0x4(%rbp)
+  // put argument onto stack.. :)
   block[4] = 0x89;
   block[5] = 0x7d;
   block[6] = 0xfc;
 
-  // get argument into eax: mov -0x4(%rbp), %eax
+  // get argument into eax :D mov eax, dword ptr [rbp-0x4]
   block[7] = 0x8b;
   block[8] = 0x45;
   block[9] = 0xfc;
@@ -58,7 +57,7 @@ void mul2_program(uint8_t* block, const size_t length)
   block[10] = 0x01;
   block[11] = 0xc0;
 
-  // prologue: pop rbp
+  // function prologue: pop rbp
   block[12] = 0x5d;
 
   // retq
