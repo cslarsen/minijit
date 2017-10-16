@@ -19,10 +19,10 @@ I've tested this on Linux and macOS systems.
 References
 ----------
 
-    * Intel assembly manuals:
-      https://software.intel.com/en-us/articles/intel-sdm
-    * x86 Reference:
-      http://ref.x86asm.net/
+  * Intel assembly manuals:
+    https://software.intel.com/en-us/articles/intel-sdm
+  * x86 Reference:
+    http://ref.x86asm.net/
 
 License
 -------
