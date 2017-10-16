@@ -121,6 +121,12 @@ int main(int argc, char** argv)
 
   testmul(block, multiplier);
 
+  printf("freeing code block\n");
+  if (munmap(block, pagesize) == -1) {
+    perror("munmap");
+    exit(1);
+  }
+
   //make_mul(block, pagesize, 11);
   //testmul(block, 11);
 
