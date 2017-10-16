@@ -23,29 +23,46 @@ void ret2_program(uint8_t* block, const size_t /*length*/)
   block[2] = 0xc3; // RETN
 }
 
-void mul2_program(uint8_t* block, const size_t /*length*/)
+void mul2_program(uint8_t* block, const size_t length)
 {
   /*
-   * 100000de4:	89 7d fc             	mov    %edi,-0x4(%rbp)
-   * 100000dea:	c1 e7 01             	shl    $0x1,%edi
-   * 100000ded:	89 f8                	mov    %edi,%eax
+   * 40085a:	55                   	push   %rbp
+   * 40085b:	48 89 e5             	mov    %rsp,%rbp
+   * 40085e:	89 7d fc             	mov    %edi,-0x4(%rbp)
+   * 400861:	8b 45 fc             	mov    -0x4(%rbp),%eax
+   * 400864:	01 c0                	add    %eax,%eax
+   * 400866:	5d                   	pop    %rbp
+   * 400867:	c3                   	retq
    */
 
-  // mov edi, rbp[-4]
-  block[0] = 0x89;
-  block[1] = 0x7d;
-  block[3] = 0xfc;
+  assert(length >= 14);
 
-  // shl edi, 1
-  block[4] = 0xc1;
-  block[5] = 0xe7;
-  block[6] = 0x01;
+  // prologue; don't usually need this
+  block[0] = 0x55; // push rbp
+  // mov %rsp, %rbp
+  block[1] = 0x48;
+  block[2] = 0x89;
+  block[3] = 0xe5;
 
-  // mox eax, edi
-  block[7] = 0x89;
-  block[8] = 0xf8;
+  // mov %edi, -0x4(%rbp)
+  block[4] = 0x89;
+  block[5] = 0x7d;
+  block[6] = 0xfc;
 
-  block[9] = 0xc3; // RETN
+  // get argument into eax: mov -0x4(%rbp), %eax
+  block[7] = 0x8b;
+  block[8] = 0x45;
+  block[9] = 0xfc;
+
+  // add eax, eax
+  block[10] = 0x01;
+  block[11] = 0xc0;
+
+  // prologue: pop rbp
+  block[12] = 0x5d;
+
+  // retq
+  block[13] = 0xc3;
 }
 
 int main()
@@ -53,22 +70,31 @@ int main()
   const size_t pagesize = sysconf(_SC_PAGE_SIZE);
   printf("pagesize %zu\n", pagesize);
 
-  uint8_t* block = static_cast<uint8_t*>(malloc(pagesize));
+  uint8_t* block = static_cast<uint8_t*>(mmap(NULL, pagesize, PROT_WRITE |
+        PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0));
 
+  if (reinterpret_cast<int64_t>(block) == -1) {
+    perror("mmap");
+    exit(1);
+  }
+
+  printf("compiling code\n");
   mul2_program(block, pagesize);
 
+  printf("marking as executable\n");
   if (mprotect(block, pagesize, PROT_READ | PROT_EXEC)) {
     perror("mprotect");
-    return 1;
+    exit(1);
   }
 
   printf("calling JIT\n");
   int (*call)(int) = reinterpret_cast<int (*)(int)>(block);
   int result = call(12);
-  assert(result == 24);
-  printf("result %d\n", result);
-  for ( int i=0; i<10; ++i )
-    printf("call(%d) = %d\n", i, call(i));
+  printf("%s result %d\n", result == 24? "OK" : "FAIL", result);
+  for ( int i=0; i<10; ++i ) {
+    result = call(i);
+    printf("%s call(%d) = %d\n", result == i*2 ? "OK" : "FAIL", i, result);
+  }
 
   printf("done\n");
   return 0;

@@ -1,4 +1,4 @@
-CXXFLAGS := -W -Wall -O2 -march=native
+CXXFLAGS := -W -Wall -O2 -g -march=native
 TARGETS := mj
 
 all: $(TARGETS)

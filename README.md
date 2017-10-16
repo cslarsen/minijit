@@ -4,6 +4,15 @@ Minijit
 A naive, educational x86-64 machine code JIT-compiler written in C++ from
 scratch.
 
+Requirements
+------------
+
+    * A UNIX system with POSIX functions `mmap`, `mprotect`
+    * An x86-64 / amd64 compatible CPU
+    * A C++ compiler
+
+I've tested this on Linux and macOS systems.
+
 References
 ----------
 
