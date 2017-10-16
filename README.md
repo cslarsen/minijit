@@ -10,6 +10,12 @@ then execute it. That's really all you need for a simple example.
 I also made a version in Python, using only the standard Python library (i.e.,
 ctypes).
 
+This is another rite-of-passage project that I just had to do. I only knew
+about mprotect, really, and just went from there. I see that this is the way
+most people do it. I knew I had to use mmap to be sure to get a page-aligned
+block of memory --- malloc cannot guarantee this --- and so far it seems to
+work pretty well!
+
 Requirements
 ------------
 
@@ -86,6 +92,12 @@ How to disassemble
        0x7ffff7ff700f:      imul   %edx,%eax
        0x7ffff7ff7012:      pop    %rbp
        0x7ffff7ff7013:      retq
+
+If you want to get serious about this
+-------------------------------------
+
+  * Check out a full-blown assembler library for Python:
+    https://github.com/Maratyszcza/PeachPy
 
 References
 ----------
