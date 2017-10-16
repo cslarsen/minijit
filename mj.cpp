@@ -23,7 +23,11 @@ void ret2_program(uint8_t* block, const size_t /*length*/)
   block[2] = 0xc3; // RETN
 }
 
-void mul2_program(uint8_t* block, const size_t)
+extern "C" int hello(int n) {
+  return n*113;
+}
+
+void make_mul(uint8_t* block, const size_t /*length*/, const int32_t multiplier)
 {
   /*
    * 4007ed:	55                   	push   rbp
@@ -53,19 +57,48 @@ void mul2_program(uint8_t* block, const size_t)
   block[8] = 0x45;
   block[9] = 0xfc;
 
-  // add eax, eax
-  block[10] = 0x01;
-  block[11] = 0xc0;
+  // mov edx, immediate 32-bit value
+  block[10] = 0xba;
+  // little-endian
+  block[11] = (multiplier & 0x000000ff);
+  block[12] = (multiplier & 0x0000ff00) >> 8;
+  block[13] = (multiplier & 0x00ff0000) >> (4*4);
+  block[14] = (multiplier & 0xff000000) >> (6*4);
+
+  // 400927:	0f af c2             	imul   eax,edx
+  block[15] = 0x0f;
+  block[16] = 0xaf;
+  block[17] = 0xc2;
 
   // function prologue: pop rbp
-  block[12] = 0x5d;
+  block[18] = 0x5d;
 
   // retq
-  block[13] = 0xc3;
+  block[19] = 0xc3;
 }
 
-int main()
+void testmul(uint8_t* block, int32_t mul)
 {
+  int (*call)(int) = reinterpret_cast<int (*)(int)>(block);
+
+  printf("calling JIT\n");
+
+  // test a simple example first
+  int result = call(12);
+  printf("%s result %d\n", result == (12*mul)? "OK" : "FAIL", result);
+
+  for ( int i=0; i<10; ++i ) {
+    result = call(i);
+    printf("%s call(%d) = %d\n", result == i*mul ? "OK" : "FAIL", i, result);
+  }
+}
+
+int main(int argc, char** argv)
+{
+  int32_t multiplier = 2;
+  if ( argc > 1 )
+    multiplier = atoi(argv[1]);
+
   const size_t pagesize = sysconf(_SC_PAGE_SIZE);
   printf("pagesize %zu\n", pagesize);
 
@@ -77,8 +110,8 @@ int main()
     exit(1);
   }
 
-  printf("compiling code\n");
-  mul2_program(block, pagesize);
+  printf("compiling code w/multiplier %d\n", multiplier);
+  make_mul(block, pagesize, multiplier);
 
   printf("marking as executable\n");
   if (mprotect(block, pagesize, PROT_READ | PROT_EXEC)) {
@@ -86,14 +119,10 @@ int main()
     exit(1);
   }
 
-  printf("calling JIT\n");
-  int (*call)(int) = reinterpret_cast<int (*)(int)>(block);
-  int result = call(12);
-  printf("%s result %d\n", result == 24? "OK" : "FAIL", result);
-  for ( int i=0; i<10; ++i ) {
-    result = call(i);
-    printf("%s call(%d) = %d\n", result == i*2 ? "OK" : "FAIL", i, result);
-  }
+  testmul(block, multiplier);
+
+  //make_mul(block, pagesize, 11);
+  //testmul(block, 11);
 
   printf("done\n");
   return 0;

@@ -16,6 +16,53 @@ Requirements
 
 I've tested this on Linux and macOS systems.
 
+How to test
+-----------
+
+It currently just JIT-compiles a multiplication function. So you can specify
+what number to multiply with on the command line. It then compiles the
+function, then runs a few test numbers. For example, to multiply with the
+number 11:
+
+    $ make mj
+    $ mj 11
+    $ ./mj 11
+    pagesize 4096
+    compiling code w/multiplier 11
+    marking as executable
+    calling JIT
+    OK result 132
+    OK call(0) = 0
+    OK call(1) = 11
+    OK call(2) = 22
+    OK call(3) = 33
+    OK call(4) = 44
+    OK call(5) = 55
+    OK call(6) = 66
+    OK call(7) = 77
+    OK call(8) = 88
+    OK call(9) = 99
+    done
+    $ echo $?
+    0
+
+How to disassemble
+------------------
+
+    $ make mj
+    $ gdb mj
+    (gdb) break test_block
+    (gdb) run
+    (gdb) x/20i block
+       0x7ffff7ff7000:      push   %rbp
+       0x7ffff7ff7001:      mov    %rsp,%rbp
+       0x7ffff7ff7004:      mov    %edi,-0x4(%rbp)
+       0x7ffff7ff7007:      mov    -0x4(%rbp),%eax
+       0x7ffff7ff700a:      mov    $0x2000000,%edx
+       0x7ffff7ff700f:      imul   %edx,%eax
+       0x7ffff7ff7012:      pop    %rbp
+       0x7ffff7ff7013:      retq   
+
 References
 ----------
 
