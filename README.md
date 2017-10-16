@@ -10,19 +10,18 @@ then execute it. That's really all you need for a simple example.
 Requirements
 ------------
 
-    * A UNIX system with POSIX functions `mmap`, `mprotect`
-    * An x86-64 / amd64 compatible CPU
-    * A C++ compiler
+  * A UNIX system with POSIX functions `mmap`, `mprotect`
+  * An x86-64 / amd64 compatible CPU
+  * A C++ compiler
 
 I've tested this on Linux and macOS systems.
 
 How to test
 -----------
 
-It currently just JIT-compiles a multiplication function. So you can specify
-what number to multiply with on the command line. It then compiles the
-function, then runs a few test numbers. For example, to multiply with the
-number 11:
+It currently just JIT-compiles a multiplication function.
+
+So, to JIT-compile a block of code that multiplies with the number 11, do:
 
     $ make mj
     $ mj 11
@@ -46,22 +45,24 @@ number 11:
     $ echo $?
     0
 
+The default value is 2.
+
 How to disassemble
 ------------------
 
     $ make mj
     $ gdb mj
-    (gdb) break test_block
-    (gdb) run
+    (gdb) break testmul
+    (gdb) run 11 # create code to multiply with 11
     (gdb) x/20i block
        0x7ffff7ff7000:      push   %rbp
        0x7ffff7ff7001:      mov    %rsp,%rbp
        0x7ffff7ff7004:      mov    %edi,-0x4(%rbp)
        0x7ffff7ff7007:      mov    -0x4(%rbp),%eax
-       0x7ffff7ff700a:      mov    $0x2000000,%edx
+       0x7ffff7ff700a:      mov    $0xb,%edx
        0x7ffff7ff700f:      imul   %edx,%eax
        0x7ffff7ff7012:      pop    %rbp
-       0x7ffff7ff7013:      retq   
+       0x7ffff7ff7013:      retq
 
 References
 ----------
