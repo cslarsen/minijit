@@ -16,21 +16,30 @@ import warnings
 
 # A few system enums.
 # NOTE: These *may* be different on various platforms. This is for macOS.
-_SC_PAGESIZE = 29
-MAP_ANONYMOUS = 0x1000
-MAP_PRIVATE = 0x0002
-PROT_EXEC = 0x04
-PROT_NONE = 0x00
-PROT_READ = 0x01
-PROT_WRITE = 0x02
-MAP_FAILED = -1 # voidptr actually
 
 # Load the C standard library
 if sys.platform.startswith("darwin"):
     libc = ctypes.cdll.LoadLibrary("libc.dylib")
+    _SC_PAGESIZE = 29
+    MAP_ANONYMOUS = 0x1000
+    MAP_PRIVATE = 0x0002
+    PROT_EXEC = 0x04
+    PROT_NONE = 0x00
+    PROT_READ = 0x01
+    PROT_WRITE = 0x02
+    MAP_FAILED = -1 # voidptr actually
+elif sys.platform.startswith("linux"):
+    libc = ctypes.cdll.LoadLibrary("libc.so.6")
+    _SC_PAGESIZE = 30
+    MAP_ANONYMOUS = 0x20
+    MAP_PRIVATE = 0x0002
+    PROT_EXEC = 0x04
+    PROT_NONE = 0x00
+    PROT_READ = 0x01
+    PROT_WRITE = 0x02
+    MAP_FAILED = -1 # voidptr actually
 else:
-    libc = ctypes.cdll.LoadLibrary("libc.so")
-    warnings.warn("Some enums MAY be wrong on your platform")
+    raise RuntimeError("Unsupported platform: %s" % sys.platform)
 
 strerror = libc.strerror
 strerror.argtypes = [ctypes.c_int]
