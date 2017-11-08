@@ -7,5 +7,11 @@ run: mj
 	./mj
 	@echo exited w/code $$?
 
+libmultiply.so: multiply.c
+	gcc -W -Wall -march=native -Os -fPIC -shared $< -o$@
+
+dis: libmultiply.so
+	objdump -d $<
+
 clean:
-	rm -f $(TARGETS)
+	rm -f $(TARGETS) libmultiply.so

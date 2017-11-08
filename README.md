@@ -93,6 +93,9 @@ How to disassemble
        0x7ffff7ff7012:      pop    %rbp
        0x7ffff7ff7013:      retq
 
+If you want to see the machine code for your own C code, modify `multiply.c`
+and run `make dis`.
+
 If you want to get serious about this
 -------------------------------------
 

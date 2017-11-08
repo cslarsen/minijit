@@ -88,51 +88,51 @@ def make_executable(block, size):
         raise RuntimeError(strerror(ctypes.get_errno()))
 
 def make_multiplier(block, multiplier):
-  # Prologue
+    if multiplier > (2**64-1):
+        raise ValueError("Multiplier does not fit in unsigned 64-bit integer")
 
-  # push rbp
-  block[0] = 0x55
+    # This function encodes the disassembly of multiply.c, which you can see
+    # with the command `make dis`. It may be different on your CPU, so adjust
+    # to match.
+    #
+    #   48 ba ed ef be ad de    movabs $0xdeadbeefed,%rdx
+    #   00 00 00
+    #   48 89 f8                mov    %rdi,%rax
+    #   48 0f af c2             imul   %rdx,%rax
+    #   c3                      retq
 
-  # mov rbp, rsp
-  block[1] = 0x48
-  block[2] = 0x89
-  block[3] = 0xe5
+    # Encoding of: movabs <multiplier>, rdx
+    block[0] = 0x48
+    block[1] = 0xba
 
-  # put argument onto stack.. :)
-  block[4] = 0x89
-  block[5] = 0x7d
-  block[6] = 0xfc
+    # Little-endian encoding of multiplier
+    block[2] = (multiplier & 0x00000000000000ff) >>  0
+    block[3] = (multiplier & 0x000000000000ff00) >>  8
+    block[4] = (multiplier & 0x0000000000ff0000) >> 16
+    block[5] = (multiplier & 0x00000000ff000000) >> 24
+    block[6] = (multiplier & 0x000000ff00000000) >> 32
+    block[7] = (multiplier & 0x0000ff0000000000) >> 40
+    block[8] = (multiplier & 0x00ff000000000000) >> 48
+    block[9] = (multiplier & 0xff00000000000000) >> 56
 
-  # get argument into eax :D mov eax, dword ptr [rbp-0x4]
-  block[7] = 0x8b
-  block[8] = 0x45
-  block[9] = 0xfc
+    # Encoding of: mov rdi, rax
+    block[10] = 0x48
+    block[11] = 0x89
+    block[12] = 0xf8
 
-  # mov edx, immediate 32-bit value
-  block[10] = 0xba
+    # Encoding of: imul rdx, rax
+    block[13] = 0x48
+    block[14] = 0x0f
+    block[15] = 0xaf
+    block[16] = 0xc2
 
-  # little-endian
-  block[11] = (multiplier & 0x000000ff)
-  block[12] = (multiplier & 0x0000ff00) >> 8
-  block[13] = (multiplier & 0x00ff0000) >> (4*4)
-  block[14] = (multiplier & 0xff000000) >> (6*4)
+    # Encoding of: retq
+    block[17] = 0xc3
 
-  # imul eax, edx
-  block[15] = 0x0f
-  block[16] = 0xaf
-  block[17] = 0xc2
-
-  # Epilogue: pop rbp
-  block[18] = 0x5d
-
-  # retq
-  block[19] = 0xc3
-
-  # Make a function out of this
-
-  function = ctypes.CFUNCTYPE(ctypes.c_int)
-  function.restype = ctypes.c_int
-  return function
+    # Return a ctypes function with the right prototype
+    function = ctypes.CFUNCTYPE(ctypes.c_int64)
+    function.restype = ctypes.c_int64
+    return function
 
 def destroy_block(block, size):
     if munmap(block, size) == -1:
@@ -140,10 +140,12 @@ def destroy_block(block, size):
     del block
 
 def main():
+    # Fetch the constant to multiply with on the command line. If not
+    # specified, use the default value of 11.
     if len(sys.argv) > 1:
         arg = int(sys.argv[1])
     else:
-        arg = 2
+        arg = 11
 
     print("Pagesize: %d" % PAGESIZE)
 
@@ -159,7 +161,10 @@ def main():
 
     print("Testing function")
     for i in range(10):
-        print("mul(%d) = %d" % (i, mul(i)))
+        expected = i*arg
+        actual = mul(i)
+        print("%-4s mul(%d) = %d" % ("OK" if actual == expected else "FAIL", i,
+            actual))
 
     print("Deallocating function")
     destroy_block(block, PAGESIZE)
