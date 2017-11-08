@@ -105,15 +105,14 @@ def make_multiplier(block, multiplier):
     # with the command `make dis`. It may be different on your CPU, so adjust
     # to match.
     #
-    #   48 ba ed ef be ad de    movabs $0xdeadbeefed,%rdx
+    #   48 b8 ed ef be ad de    movabs $0xdeadbeefed,%rax
     #   00 00 00
-    #   48 89 f8                mov    %rdi,%rax
-    #   48 0f af c2             imul   %rdx,%rax
+    #   48 0f af c7             imul   %rdi,%rax
     #   c3                      retq
 
-    # Encoding of: movabs <multiplier>, rdx
+    # Encoding of: movabs <multiplier>, rax
     block[0] = 0x48
-    block[1] = 0xba
+    block[1] = 0xb8
 
     # Little-endian encoding of multiplier
     block[2] = (multiplier & 0x00000000000000ff) >>  0
@@ -125,19 +124,15 @@ def make_multiplier(block, multiplier):
     block[8] = (multiplier & 0x00ff000000000000) >> 48
     block[9] = (multiplier & 0xff00000000000000) >> 56
 
-    # Encoding of: mov rdi, rax
+    # Encoding of: imul rdi, rax
     block[10] = 0x48
-    block[11] = 0x89
-    block[12] = 0xf8
+    block[11] = 0x0f
+    block[12] = 0xaf
+    block[13] = 0xc7
 
-    # Encoding of: imul rdx, rax
-    block[13] = 0x48
-    block[14] = 0x0f
-    block[15] = 0xaf
-    block[16] = 0xc2
 
     # Encoding of: retq
-    block[17] = 0xc3
+    block[14] = 0xc3
 
     # Return a ctypes function with the right prototype
     function = ctypes.CFUNCTYPE(ctypes.c_int64)
