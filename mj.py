@@ -12,10 +12,6 @@ Written by Christian Stigen
 
 import ctypes
 import sys
-import warnings
-
-# A few system enums.
-# NOTE: These *may* be different on various platforms. This is for macOS.
 
 # Load the C standard library
 if sys.platform.startswith("darwin"):
@@ -41,6 +37,7 @@ elif sys.platform.startswith("linux"):
 else:
     raise RuntimeError("Unsupported platform: %s" % sys.platform)
 
+# Set up strerror
 strerror = libc.strerror
 strerror.argtypes = [ctypes.c_int]
 strerror.restype = ctypes.c_char_p
@@ -56,6 +53,7 @@ PAGESIZE = sysconf(_SC_PAGESIZE)
 # 8-bit unsigned pointer type
 c_uint8_p = ctypes.POINTER(ctypes.c_uint8)
 
+# Setup mmap
 mmap = libc.mmap
 mmap.argtypes = [ctypes.c_void_p,
                  ctypes.c_size_t,
@@ -66,15 +64,18 @@ mmap.argtypes = [ctypes.c_void_p,
                  ctypes.c_int64]
 mmap.restype = c_uint8_p
 
+# Setup munmap
 munmap = libc.munmap
 munmap.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
 munmap.restype = ctypes.c_int
 
+# Set mprotect
 mprotect = libc.mprotect
 mprotect.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
 mprotect.restype = ctypes.c_int
 
 def create_block(size):
+    """Allocated a block of memory using mmap."""
     ptr = mmap(0, size,
             PROT_WRITE | PROT_READ,
             MAP_PRIVATE | MAP_ANONYMOUS, 0, 0)
@@ -84,11 +85,20 @@ def create_block(size):
     return ptr
 
 def make_executable(block, size):
+    """Marks mmap'ed memory block as read-only and executable."""
     if mprotect(block, size, PROT_READ | PROT_EXEC) != 0:
         raise RuntimeError(strerror(ctypes.get_errno()))
 
+def destroy_block(block, size):
+    """Deallocated previously mmapped block."""
+    if munmap(block, size) == -1:
+        raise RuntimeError(strerror(ctypes.get_errno()))
+    del block
+
 def make_multiplier(block, multiplier):
-    if multiplier > (2**64-1):
+    """JIT-compiles a function that multiplies its RDX argument with an
+    unsigned 64-bit constant."""
+    if multiplier > (2**64-1) or multiplier < 0:
         raise ValueError("Multiplier does not fit in unsigned 64-bit integer")
 
     # This function encodes the disassembly of multiply.c, which you can see
@@ -133,11 +143,6 @@ def make_multiplier(block, multiplier):
     function = ctypes.CFUNCTYPE(ctypes.c_int64)
     function.restype = ctypes.c_int64
     return function
-
-def destroy_block(block, size):
-    if munmap(block, size) == -1:
-        raise RuntimeError(strerror(ctypes.get_errno()))
-    del block
 
 def main():
     # Fetch the constant to multiply with on the command line. If not
