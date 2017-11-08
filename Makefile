@@ -8,7 +8,7 @@ run: mj
 	@echo exited w/code $$?
 
 libmultiply.so: multiply.c
-	gcc -W -Wall -march=native -Os -fPIC -shared $< -o$@
+	gcc -fomit-frame-pointer -W -Wall -march=native -Os -fPIC -shared $< -o$@
 
 dis: libmultiply.so
 	objdump -d $<
