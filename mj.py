@@ -135,8 +135,8 @@ def make_multiplier(block, multiplier):
     block[14] = 0xc3
 
     # Return a ctypes function with the right prototype
-    function = ctypes.CFUNCTYPE(ctypes.c_int64)
-    function.restype = ctypes.c_int64
+    function = ctypes.CFUNCTYPE(ctypes.c_uint64)
+    function.restype = ctypes.c_uint64
     return function
 
 def main():
