@@ -2,7 +2,7 @@ Minijit
 =======
 
 A naive, educational x86-64 machine code JIT-compiler written in C++ from
-scratch.
+scratch. Contains code for the blog post at https://csl.name/post/python-jit/
 
 It doesn't do anything cool except write machine code into a memory region and
 then execute it. That's really all you need for a simple example.
