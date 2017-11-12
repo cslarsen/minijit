@@ -11,44 +11,24 @@ Written by Christian Stigen
 """
 
 import ctypes
+import ctypes.util
+import mmap as MMAP
+import os
 import sys
 
 # Load the C standard library
-if sys.platform.startswith("darwin"):
-    libc = ctypes.cdll.LoadLibrary("libc.dylib")
-    _SC_PAGESIZE = 29
-    MAP_ANONYMOUS = 0x1000
-    MAP_PRIVATE = 0x0002
-    PROT_EXEC = 0x04
-    PROT_NONE = 0x00
-    PROT_READ = 0x01
-    PROT_WRITE = 0x02
-    MAP_FAILED = -1 # voidptr actually
-elif sys.platform.startswith("linux"):
-    libc = ctypes.cdll.LoadLibrary("libc.so.6")
-    _SC_PAGESIZE = 30
-    MAP_ANONYMOUS = 0x20
-    MAP_PRIVATE = 0x0002
-    PROT_EXEC = 0x04
-    PROT_NONE = 0x00
-    PROT_READ = 0x01
-    PROT_WRITE = 0x02
-    MAP_FAILED = -1 # voidptr actually
-else:
-    raise RuntimeError("Unsupported platform: %s" % sys.platform)
+libc = ctypes.CDLL(ctypes.util.find_library("c"))
+
+# A few constants
+MAP_FAILED = -1 # voidptr actually
 
 # Set up strerror
 strerror = libc.strerror
 strerror.argtypes = [ctypes.c_int]
 strerror.restype = ctypes.c_char_p
 
-# Set up sysconf
-sysconf = libc.sysconf
-sysconf.argtypes = [ctypes.c_int]
-sysconf.restype = ctypes.c_long
-
 # Get pagesize
-PAGESIZE = sysconf(_SC_PAGESIZE)
+PAGESIZE = os.sysconf(os.sysconf_names["SC_PAGESIZE"])
 
 # 8-bit unsigned pointer type
 c_uint8_p = ctypes.POINTER(ctypes.c_uint8)
@@ -76,9 +56,9 @@ mprotect.restype = ctypes.c_int
 
 def create_block(size):
     """Allocated a block of memory using mmap."""
-    ptr = mmap(0, size,
-            PROT_WRITE | PROT_READ,
-            MAP_PRIVATE | MAP_ANONYMOUS, 0, 0)
+    ptr = mmap(0, size, MMAP.PROT_WRITE | MMAP.PROT_READ,
+            MMAP.MAP_PRIVATE | MMAP.MAP_ANONYMOUS, 0, 0)
+
     if ptr == MAP_FAILED:
         raise RuntimeError(strerror(ctypes.get_errno()))
 
@@ -86,7 +66,7 @@ def create_block(size):
 
 def make_executable(block, size):
     """Marks mmap'ed memory block as read-only and executable."""
-    if mprotect(block, size, PROT_READ | PROT_EXEC) != 0:
+    if mprotect(block, size, MMAP.PROT_READ | MMAP.PROT_EXEC) != 0:
         raise RuntimeError(strerror(ctypes.get_errno()))
 
 def destroy_block(block, size):
@@ -168,6 +148,8 @@ def main():
 
     print("Deallocating function")
     destroy_block(block, PAGESIZE)
+
+    # Unbind local variables
     del block
     del mul
 
