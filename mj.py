@@ -1,13 +1,12 @@
 """
 A rudimentary x86-64 JIT-compiler using only standard Python libraries.
 
-Meaning, you need to be on a UNIX system with mmap, mprotect and so on.
+Meaning, you need to be on a UNIX/POSIX system with mmap, mprotect and so on.
+Has been tested on macOS and Linux.
 
-Yes, this *actually* works! I've only tested on macOS so far, but it should be
-very simple to get it to work on other systems. There isn't much error checking
-going on, so be prepared for weird crashes!
+See https://csl.name/post/python-jit/ for a write-up on how everything works!
 
-Written by Christian Stigen
+Written by Christian Stigen Larsen
 """
 
 import ctypes

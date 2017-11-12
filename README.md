@@ -1,4 +1,4 @@
-Minijit
+MiniJIT
 =======
 
 A naive, educational x86-64 machine code JIT-compiler written in C++ from
@@ -7,14 +7,12 @@ scratch. Contains code for the blog post at https://csl.name/post/python-jit/
 It doesn't do anything cool except write machine code into a memory region and
 then execute it. That's really all you need for a simple example.
 
-I also made a version in Python, using only the standard Python library (i.e.,
-ctypes).
+The file mj.cpp was the first version, but the updated one is mj.py that only
+uses built-in Python libraries.
 
 This is another rite-of-passage project that I just had to do. I only knew
 about mprotect, really, and just went from there. I see that this is the way
-most people do it. I knew I had to use mmap to be sure to get a page-aligned
-block of memory --- malloc cannot guarantee this --- and so far it seems to
-work pretty well!
+most people do it.
 
 Requirements
 ------------
@@ -25,8 +23,31 @@ Requirements
 
 I've tested this on Linux and macOS systems.
 
-How to test
------------
+How to run the Python version
+-----------------------------
+
+Obviously, you need a CPU that understands the JIT-ed code. Just run
+
+    $ python mj.py 101
+    Pagesize: 4096
+    Allocating one page of memory
+    JIT-compiling a native mul-function w/arg 101
+    Making function block executable
+    Testing function
+    OK   mul(0) = 0
+    OK   mul(1) = 101
+    OK   mul(2) = 202
+    OK   mul(3) = 303
+    OK   mul(4) = 404
+    OK   mul(5) = 505
+    OK   mul(6) = 606
+    OK   mul(7) = 707
+    OK   mul(8) = 808
+    OK   mul(9) = 909
+    Deallocating function
+
+How to run C++ version
+----------------------
 
 It currently just JIT-compiles a multiplication function.
 

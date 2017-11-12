@@ -127,9 +127,6 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  //make_mul(block, pagesize, 11);
-  //testmul(block, 11);
-
   printf("done\n");
   return 0;
 }
