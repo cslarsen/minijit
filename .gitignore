@@ -1,5 +1,6 @@
 *.dSYM
 *.o
+*.pyc
 *.so
 GPATH
 GRTAGS

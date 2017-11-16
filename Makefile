@@ -1,6 +1,9 @@
 CXXFLAGS := -W -Wall -O2 -g -march=native
 TARGETS := mj
 
+test:
+	python compiler-tests.py
+
 all: $(TARGETS)
 
 run: mj
