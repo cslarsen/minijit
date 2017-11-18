@@ -294,3 +294,37 @@ def compile_native(function, verbose=True):
 
     signature.restype = ctypes.c_int64
     return signature(assembler.address), assembler
+
+def jit(function, verbose=True):
+    """Decorator that JIT-compiles function to native code on first call.
+
+    Use this on non-class functions, because our compiler does not support
+    objects (rather, it does not support the attr bytecode instructions).
+
+    Example:
+        @jit
+        def foo(a, b):
+            return a*a - b*b
+    """
+    if verbose:
+        print("Installing JIT for %s" % function)
+
+    def frontend(*args, **kw):
+        if not hasattr(frontend, "function"):
+            if verbose:
+                print("JIT-compiling %s" % function)
+
+            try:
+                native, asm = compile_native(function, verbose=False)
+                frontend.function = native
+                print("Installed native code for %s" % function)
+            except Exception as e:
+                if verbose:
+                    print("Could not compile %s, falling back: %s" % (function, e))
+                frontend.function = function
+
+        if verbose:
+            print("Calling function %s" % frontend.function)
+        return frontend.function(*args, **kw)
+
+    return frontend
