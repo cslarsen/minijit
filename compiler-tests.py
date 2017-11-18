@@ -87,6 +87,9 @@ if __name__ == "__main__":
     def example7(a, b, c):
         return (a+c)*b - a*a*(a-c-b)-b*2+(c*(2+3*a*b-c*a)-3*c)
 
+    def foo(a, b):
+        return a*a - b*b
+
     test(example0)
     test(example1)
     test(example2)
@@ -94,9 +97,8 @@ if __name__ == "__main__":
     test(example4)
     test(example5)
     test(example6)
-
-    # Disable; too much output (but works)
-    #test(example7)
+    #test(example7) # works, but produces too much output
+    test(foo)
 
     if not good:
         print("")
