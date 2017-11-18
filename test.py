@@ -8,7 +8,7 @@ Put in the public domain by the author, 2017
 """
 
 import random
-import compiler
+import jitcompiler
 import sys
 
 try:
@@ -21,7 +21,7 @@ good = True
 def test_function(original, compiled, tests=10, minval=-999, maxval=999):
     for n in range(tests):
         # Create random arguments
-        argcount = compiler.get_codeobj(original).co_argcount
+        argcount = jitcompiler.get_codeobj(original).co_argcount
         args = [random.randint(minval, maxval) for x in range(argcount)]
 
         # Run original and compiled functions
@@ -44,7 +44,7 @@ def test(function):
     print("=== Function %s ===" % function.__name__)
     print("")
 
-    native, asm = compiler.compile_function(function)
+    native, asm = jitcompiler.compile_native(function)
 
     try:
         print("Native code:")

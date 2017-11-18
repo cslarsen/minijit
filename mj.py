@@ -1,8 +1,9 @@
 """
-A rudimentary x86-64 JIT-compiler using only standard Python libraries.
+Provides a way to generate machine code and bind it to callable Python
+functions at runtime.
 
-Meaning, you need to be on a UNIX/POSIX system with mmap, mprotect and so on.
-Has been tested on macOS and Linux.
+You need a UNIX system with mmap, mprotect and so on. Tested on macOS and
+Linux.
 
 See https://csl.name/post/python-jit/ for a write-up on how everything works!
 

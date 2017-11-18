@@ -235,16 +235,19 @@ def print_ir(ir):
         args = filter(lambda x: x is not None, args)
         print("  %-6s %s" % (op, ", ".join(map(str, args))))
 
-def compile_function(function):
-    print("Python disassembly:")
-    dis.dis(function)
-    print("")
+def compile_native(function, verbose=True):
+    if verbose:
+        print("Python disassembly:")
+        dis.dis(function)
+        print("")
 
     codeobj = get_codeobj(function)
-    print("Bytecode: %r" % codeobj.co_code)
-    print("")
+    if verbose:
+        print("Bytecode: %r" % codeobj.co_code)
+        print("")
 
-    print("Intermediate code:")
+    if verbose:
+        print("Intermediate code:")
     constants = codeobj.co_consts
 
     python_bytecode = list(codeobj.co_code)
@@ -254,19 +257,23 @@ def compile_function(function):
 
     ir = Compiler(python_bytecode, constants).compile()
     ir = list(ir)
-    print_ir(ir)
-    print("")
+    if verbose:
+        print_ir(ir)
+        print("")
 
-    print("Optimization:")
+    if verbose:
+        print("Optimization:")
     while True:
         optimized = list(optimize(ir))
         reduction = len(ir) - len(optimized)
         ir = optimized
-        print("  - removed %d instructions" % reduction)
+        if verbose:
+            print("  - removed %d instructions" % reduction)
         if not reduction:
             break
-    print_ir(ir)
-    print("")
+    if verbose:
+        print_ir(ir)
+        print("")
 
     # Compile to native code
     assembler = Assembler(mj.PAGESIZE)

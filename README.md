@@ -21,7 +21,7 @@ The first one patches up some machine code and runs it at runtime
 
 The second one JIT compiles Python bytecode to machine code at runtime
 
-    $ python compiler-tests.py
+    $ python tests.py
 
 If you have the `capstone` module installed, it will display an in-memory
 disassembly as well.
@@ -37,8 +37,8 @@ References
 
   * Intel assembly manuals:
     https://software.intel.com/en-us/articles/intel-sdm
-  * x86 Reference:
-    http://ref.x86asm.net/
+
+  * x86 Reference: http://ref.x86asm.net/
 
 License
 -------
