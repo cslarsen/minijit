@@ -320,7 +320,9 @@ def jit(function, verbose=True):
                 print("Installed native code for %s" % function)
             except Exception as e:
                 if verbose:
-                    print("Could not compile %s, falling back: %s" % (function, e))
+                    print("Could not compile %s: %s: %s" % (function,
+                        e.__class__.__name__, e))
+                    print("Falling back to %s" % function)
                 frontend.function = function
 
         if verbose:
