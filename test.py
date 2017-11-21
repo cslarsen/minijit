@@ -54,7 +54,6 @@ def test(function):
             if i.mnemonic == "ret":
                 break
         print("")
-
     except NameError:
         pass
 

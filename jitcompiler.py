@@ -316,6 +316,8 @@ def jit(function, verbose=True):
 
             try:
                 native, asm = compile_native(function, verbose=False)
+                native.raw = asm.raw
+                native.address = asm.address
                 frontend.function = native
                 print("Installed native code for %s" % function)
             except Exception as e:
@@ -330,3 +332,30 @@ def jit(function, verbose=True):
         return frontend.function(*args, **kw)
 
     return frontend
+
+def disassemble(function):
+    """Returns disassembly string of natively compiled function.
+
+    Requires the Capstone module."""
+    def hexbytes(b):
+        return "".join(map(lambda x: hex(x)[2:] + " ", b))
+
+    def chunkstring(string, length):
+        # Taken from http://stackoverflow.com/a/18854817/21028
+        return (string[0+i:length+i] for i in range(0, len(string), length))
+
+    try:
+        import capstone
+
+        out = ""
+        md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+
+        for i in md.disasm(function.raw, function.address):
+            out += "0x%x %-15s%s %s\n" % (i.address, hexbytes(i.bytes), i.mnemonic, i.op_str)
+            if i.mnemonic == "ret":
+                break
+
+        return out
+    except ImportError:
+        print("You need to install the Capstone module for disassembly")
+        raise
