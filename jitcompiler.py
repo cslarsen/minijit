@@ -337,8 +337,8 @@ def disassemble(function):
     """Returns disassembly string of natively compiled function.
 
     Requires the Capstone module."""
-    def hexbytes(b):
-        return "".join(map(lambda x: hex(x)[2:] + " ", b))
+    def hexbytes(raw):
+        return "".join("%02x " % b for b in raw)
 
     try:
         import capstone
