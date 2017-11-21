@@ -21,4 +21,4 @@ test(1, 2)
 test(2, 3)
 
 print("\nDisassembly of foo\n")
-print(jitcompiler.disassemble(foo.function))
+print(jitcompiler.disassemble(foo))

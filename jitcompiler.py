@@ -337,6 +337,9 @@ def disassemble(function):
     """Returns disassembly string of natively compiled function.
 
     Requires the Capstone module."""
+    if hasattr(function, "function"):
+        function = function.function
+
     def hexbytes(raw):
         return "".join("%02x " % b for b in raw)
 
