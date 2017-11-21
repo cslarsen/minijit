@@ -340,10 +340,6 @@ def disassemble(function):
     def hexbytes(b):
         return "".join(map(lambda x: hex(x)[2:] + " ", b))
 
-    def chunkstring(string, length):
-        # Taken from http://stackoverflow.com/a/18854817/21028
-        return (string[0+i:length+i] for i in range(0, len(string), length))
-
     try:
         import capstone
 
