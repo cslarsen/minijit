@@ -295,7 +295,7 @@ def compile_native(function, verbose=True):
     signature.restype = ctypes.c_int64
     return signature(assembler.address), assembler
 
-def jit(function, verbose=True):
+def jit(function):
     """Decorator that JIT-compiles function to native code on first call.
 
     Use this on non-class functions, because our compiler does not support
@@ -306,31 +306,21 @@ def jit(function, verbose=True):
         def foo(a, b):
             return a*a - b*b
     """
-    if verbose:
-        print("Installing JIT for %s" % function)
+    print("--- Installing JIT for %s" % function)
 
     def frontend(*args, **kw):
         if not hasattr(frontend, "function"):
-            if verbose:
-                print("JIT-compiling %s" % function)
-
             try:
+                print("--- JIT-compiling %s" % function)
                 native, asm = compile_native(function, verbose=False)
                 native.raw = asm.raw
                 native.address = asm.address
                 frontend.function = native
-                print("Installed native code for %s" % function)
             except Exception as e:
-                if verbose:
-                    print("Could not compile %s: %s: %s" % (function,
-                        e.__class__.__name__, e))
-                    print("Falling back to %s" % function)
-                frontend.function = function
-
-        if verbose:
-            print("Calling function %s" % frontend.function)
+                frontend.function = function # fallback to Python
+                print("--- Could not compile %s: %s: %s" % (function.__name__,
+                    e.__class__.__name__, e))
         return frontend.function(*args, **kw)
-
     return frontend
 
 def disassemble(function):
