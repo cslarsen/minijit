@@ -46,7 +46,7 @@ class Assembler(object):
 
     def little_endian(self, n):
         """Converts 64-bit number to little-endian format."""
-        return [(n & (0xff << i*2)) >> i*8 for i in range(8)]
+        return [(n & (0xff << (i*8))) >> (i*8) for i in range(8)]
 
     def registers(self, a, b=None):
         """Encodes one or two registers for machine code instructions."""
