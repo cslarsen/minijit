@@ -1,9 +1,8 @@
 *.dSYM
 *.o
 *.pyc
+*.pyo
 *.so
 GPATH
 GRTAGS
 GTAGS
-libmultiply.so
-mj

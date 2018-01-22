@@ -89,6 +89,9 @@ if __name__ == "__main__":
     def foo(a, b):
         return a*a - b*b
 
+    def bar(n):
+        return n+123456789
+
     test(example0)
     test(example1)
     test(example2)
@@ -98,6 +101,7 @@ if __name__ == "__main__":
     test(example6)
     #test(example7) # works, but produces too much output
     test(foo)
+    test(bar)
 
     if not good:
         print("")
