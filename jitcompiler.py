@@ -136,7 +136,10 @@ class Compiler(object):
                 yield "mov", self.variable(arg), "rax"
 
             elif op == "LOAD_CONST":
-                yield "immediate", "rax", self.constants[arg]
+                value = self.constants[arg]
+                if value is None:
+                    value = 0
+                yield "immediate", "rax", value
                 yield "push", "rax", None
 
             elif op == "BINARY_MULTIPLY":
