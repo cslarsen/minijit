@@ -46,6 +46,8 @@ class Assembler(object):
 
     def little_endian(self, n):
         """Converts 64-bit number to little-endian format."""
+        if n is None:
+            n = 0
         return [(n & (0xff << (i*8))) >> (i*8) for i in range(8)]
 
     def registers(self, a, b=None):
