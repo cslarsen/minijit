@@ -83,7 +83,7 @@ class Assembler(object):
         self.emit(0x48, 0x29, 0xc0 | self.registers(b, a))
 
     def neg(self, a, _):
-        self.emit(0x48, 0xf7, 0xd8 | self.register(a))
+        self.emit(0x48, 0xf7, 0xd8 | self.registers(a))
 
     def mov(self, a, b):
         self.emit(0x48, 0x89, 0xc0 | self.registers(b, a))
