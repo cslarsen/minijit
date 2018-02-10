@@ -6,8 +6,23 @@ Explanation on https://csl.name/post/python-compiler/
 
 Tested on Python 2.7, 3.4 and 3.6.
 
+Example Usage
+-------------
+
+    from jitcompiler import jit
+
+    @jit
+    def foo(a, b):
+        return a*a - b*b
+
+    # When foo is called the first time, it will be swapped out with native
+    # code. See the blog posts for details.
+
+License
+-------
+
 Written by Christian Stigen Larsen
-Put in the public domain by the author, 2017
+Put in the public domain by the author in 2017
 """
 
 import ctypes
@@ -208,7 +223,7 @@ def optimize(ir):
 
         # Same as above, but with an in-between instruction
         if op1 == "push" and op3 == "pop" and op2 not in ("push", "pop"):
-            # Only do this if a3 is not mofidied in the middle instruction. An
+            # Only do this if a3 is not modified in the middle instruction. An
             # obvious improvement would be to allow an arbitrary number of
             # in-between instructions.
             if a2 != a3:
@@ -217,13 +232,10 @@ def optimize(ir):
                 yield op2, a2, b2
                 continue
 
+        # Same as above, but with one in-between instruction.
         # TODO: Generalize this, then remove the previous two
-        # Same as above, but with an in-between instruction
         if (op1 == "push" and op4 == "pop" and op2 not in ("push", "pop") and
                 op3 not in ("push", "pop")):
-            # Only do this if a3 is not mofidied in the middle instruction. An
-            # obvious improvement would be to allow an arbitrary number of
-            # in-between instructions.
             if a2 != a4 and a3 != a4:
                 index += 4
                 yield "mov", a4, a1
@@ -241,6 +253,13 @@ def print_ir(ir):
         print("  %-6s %s" % (op, ", ".join(map(str, args))))
 
 def compile_native(function, verbose=True):
+    """Compiles a branchless Python function to native x86-64 machine code.
+
+    Returns:
+        A tuple consisting of a callable Python function bound to the native
+        code, and the assembler used to create it (mostly for disassembly
+        purposes).
+    """
     if verbose:
         print("Python disassembly:")
         dis.dis(function)
@@ -305,6 +324,9 @@ def jit(function):
 
     Use this on non-class functions, because our compiler does not support
     objects (rather, it does not support the attr bytecode instructions).
+
+    Also, only works on branchless Python functions that only perform
+    arithmetic on signed, 64-bit integers.
 
     Example:
         @jit
