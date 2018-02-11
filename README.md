@@ -12,8 +12,29 @@ Contains code for the posts
 You need a UNIX/POSIX system and an x86-64 compatible CPU. I've tested this on
 Linux and macOS, using Python 2.7 and 3+
 
-How to run
-----------
+The ~500 lines of code relies only on standard Python libraries and contains a
+Python bytecode converter, peephole optimizer and x86-64 machine code
+assembler. The code is meant to be simple to understand and pedagogical.
+
+Finally, there is a decorator that automatically swaps out Python functions
+with native code:
+
+    >>> from jitcompiler import jit, disassemble
+    >>> @jit
+    ... def foo(a, b): return a + b
+    ... 
+    --- Installing JIT for <function foo at 0x10bc48c08>
+    >>> foo(10, -2)
+    --- JIT-compiling <function foo at 0x10bc48c08>
+    8
+    >>> print(disassemble(foo))
+    0x10bb3c000 48 89 fb       mov rbx, rdi
+    0x10bb3c003 48 89 f0       mov rax, rsi
+    0x10bb3c006 48 01 d8       add rax, rbx
+    0x10bb3c009 c3             ret 
+
+How to run tests
+----------------
 
 The first one patches up some machine code and runs it at runtime
 

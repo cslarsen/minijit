@@ -27,21 +27,25 @@ Put in the public domain by the author in 2017
 
 import ctypes
 import dis
-import mj
 import sys
+
+# Local include: Provides mmap and related functionality
+import mj
 
 # Used for compatibility with Python 2.7 and 3+
 PRE36 = sys.version_info[:2] < (3, 6)
 
 def get_codeobj(function):
+    # NOTE: Seems that __code__ works on Python 2.7 as well now
     if hasattr(function, "func_code"):
         return function.func_code
     else:
         return function.__code__
 
 class Assembler(object):
+    """An x86-64 assembler."""
+
     def __init__(self, size):
-        """An x86-64 assembler."""
         self.block = mj.create_block(size)
         self.index = 0
         self.size = size
