@@ -3,7 +3,7 @@ MiniJIT
 
 Contains code for the posts
 
-  * Writine a basic x86-64 JIT compiler from scratch in stock Python
+  * Writing a basic x86-64 JIT compiler from scratch in stock Python
     https://csl.name/post/python-jit/
 
   * JIT compiling a tiny subset of Python to x86-64 from scratch — in Python
